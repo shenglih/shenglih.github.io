@@ -2,3 +2,474 @@
 layout: research
 title: Shengli Hu, Research
 ---
+<head>
+  
+  <!-- <title>MTurk HIT</title>
+  <script type="text/javascript" async="" src="https://ssl.google-analytics.com/ga.js"></script><script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"></script>
+  <script>
+  Global site tag (gtag.js) - Google Analytics
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-121628140-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-121628140-1');
+  </script> -->
+
+    $.fn.serializeObject = function()
+    {
+        var o = {};
+        var a = this.serializeArray();
+        $.each(a, function() {
+            if (o[this.name] !== undefined) {
+                if (!o[this.name].push) {
+                    o[this.name] = [o[this.name]];
+                }
+                o[this.name].push(this.value || '');
+            } else {
+                o[this.name] = this.value || '';
+            }
+        });
+        return o;
+    };
+  
+    function shuffle(array) {
+        var tmp, current, top = array.length;
+
+        if(top) while(--top) {
+            current = Math.floor(Math.random() * (top + 1));
+            tmp = array[current];
+            array[current] = array[top];
+            array[top] = tmp;
+        }
+
+        return array;
+    }
+  
+    function oc(a) {
+      var o = {};
+      for(var i=0;i<a.length;i++)
+        o[a[i]]='';
+      return o;
+    }
+  
+    $().ready(function(){
+      
+      //
+      // Questions Code
+      //
+      
+      var n = 0;
+      $('#questions_wrapper').hide();
+      $('#next_final').hide();
+      
+      $('#next').click(function(){
+        if (!$('input[name=q'+n+']:checked').val()) {
+          $('input[name=q'+n+']').each(function(){
+            $(this).parent().animate({color: 'red'}, 300);
+          });
+          return false;
+        }
+        
+        function continueThis() {
+          $('.question:eq('+n+')').hide();
+          n++;
+          if ($('.question:eq('+n+')').length > 0) {
+            $('.question:eq('+n+')').show();
+          }
+          if ($('.question:eq('+(n+1)+')').length == 0) {
+            $('#next').hide();
+            $('#next_final').show();
+          }
+        }
+        
+        var corr = '1';
+        var corr_oth = '2';
+        if ($('input[name=q'+n+'_sw]').val() == '1') {
+          corr = '2';
+          corr_oth = '1';
+        }
+        if ($('input[name=q'+n+']:checked').val() != corr) {
+          $('input[name=q'+n+'][value='+corr_oth+']').parent().animate({color: 'red'}, 300);
+          num_incorrect++;
+          if (n < 3) {
+            num_incorrect_warmup++;
+          }
+        }
+        $('#qblock_'+n+' .quote:eq('+(corr-1)+')').prepend($('<div style=\'float: right;\'><img src="tick.png" />&nbsp;</div>'));
+        $('#qblock_'+n+' .quote:eq('+(corr_oth-1)+')').prepend($('<div style=\'float: right;\'><img src="cross.png" />&nbsp;</div>'));
+        $('input[name=q'+n+'][value='+corr+']').parent().animate({color: 'green'}, 300).delay(600).queue(continueThis);
+      });
+      
+      $('#next_final').click(function() {
+        var corr = '1';
+        var corr_oth = '2';
+        if ($('input[name=q'+n+'_sw]').val() == '1') {
+          corr = '2';
+          corr_oth = '1';
+        }
+        if ($('input[name=q'+n+']:checked').val() != corr) {
+          $('input[name=q'+n+'][value='+corr_oth+']').parent().animate({color: 'red'}, 300);
+          num_incorrect++;
+          if (n < 3) {
+            num_incorrect_warmup++;
+          }
+        }
+        $('#qblock_'+n+' .quote:eq('+(corr-1)+')').prepend($('<div style=\'float: right;\'><img src="tick.png" />&nbsp;</div>'));
+        $('#qblock_'+n+' .quote:eq('+(corr_oth-1)+')').prepend($('<div style=\'float: right;\'><img src="cross.png" />&nbsp;</div>'));
+        $('input[name=q'+n+'][value='+corr+']').parent().animate({color: 'green'}, 300).delay(600).queue(function() {
+          $('#next_final').hide();
+          $('.question').hide();
+          $('#final_instructions').show();
+        });
+      });
+      
+      $('#next_comments').click(function() {
+        var someRed = false;
+        for (var k=1; k<5; k++) {
+          if (!$('input[name=rec'+k+'c]:checked').val()) {
+            $('input[name=rec'+k+'c]').each(function(){
+              $(this).parent().animate({color: 'red'}, 300);
+            });
+            someRed = true;
+          }
+        }
+        if (someRed) {
+          return false;
+        }
+        $('#final_instructions').hide();
+        $('#comments').show();
+        $('#num_correct').html(num_total-3-num_incorrect+num_incorrect_warmup + ' out of ' + (num_total-3));
+      });
+      
+      $('#submit').click(function() {
+        $.ajax({
+          url: 'store_results.php',
+          data: { worker_id: '', json: JSON.stringify($('form').serializeObject()) },
+          async: false,
+          type: "POST",
+          success: function(data) {
+            $('#submit').val('Submitted! Thanks for your time!').attr('disabled','disabled');
+          }
+        });
+        $('#comments').hide();
+        $('#post_submit').show();
+        return false;
+      });
+      
+      //
+      // Hello World Code
+      //
+      
+      $('#name').keypress(function(e) {
+        if (e.which == 13) { // Prevent enter key from submitting
+          $('#hello_continue').click();
+          return false;
+        }
+      });
+      
+      $('#hello_continue').click(function(){ 
+        $('#hello_there').hide();
+        $('#logo_selector').show();
+        $('#your_name').html($('#name').val());
+      });
+      
+      //
+      // Logo Selector Code
+      //
+
+      var logo_list = [];
+      var selected_yes = [];
+      var selected_no = [];
+      var selected_np = 0;
+      var i = 0;
+      var num_incorrect = 0;
+      var num_incorrect_warmup = 0;
+      var num_total = 0;
+      
+      $.post('get_logos.php', {group_id: 1}, function(data) {
+        logo_list = data;
+        show_next_movie();
+      }, 'json');
+      
+      function show_next_movie() {
+        if (selected_yes.length >= 0 && selected_no.length >= 16) {
+          load_data();
+        }
+        else {
+          if (0 - selected_yes.length <= 2 && 16 - selected_no.length <= 2) {
+            $('.info .extra').show();
+          }
+          $('#logo_name').html(logo_list[i++]);
+        }
+      }
+      
+      $('#logo_yes').click(function() {
+        selected_yes.push(logo_list[i-1]);
+        show_next_movie();
+      });
+      
+      $('#logo_no').click(function() {
+        if (i % 5 != 0) {
+          selected_no.push(logo_list[i-1]);
+        }
+        show_next_movie();
+      });
+      
+      //
+      // Instructions Code
+      //
+      
+      function show_instructions() {
+        $('#logo_selector').hide();
+        $('.container').addClass('highlight');
+        $('#instructions').show();
+      }
+      
+      $('#recb').keypress(function(e) {
+        if (e.which == 13) { // Prevent enter key from submitting
+          return false;
+        }
+        $('#inst_questions').show();
+      });
+      
+      $('#inst_questions').click(function() {
+        if (!((parseInt($("#recb").val()) <= 4 && parseInt($("#recb").val()) >= 1 ) || $("#recb").val() == '0')) {
+          alert("Sorry, but you entered an invalid entry and cannot proceed. Thank you for your time!");
+          $('#submit').click();
+        }
+        $('#instructions').hide();
+        $('.container').removeClass('highlight');
+        $('#question_instructions').show();
+      });
+      
+      $('#inst_questions').hide();
+      
+      $('#start_questions').click(function(){
+        $('#question_instructions').hide();
+        $('.question').hide();
+        $('.question:eq('+n+')').show();
+        $('#questions_wrapper').show();
+      });
+      
+      //
+      // Load Data
+      //
+      
+      function load_data() {
+        $('#logo_selector').hide();
+        $('#loading').show();
+        $.post('get_logo_quotes.php', {gid: 1, 'logos[]': selected_yes, 'unseen[]': selected_no}, function(data) {
+          function build_question(logo_title, quote_1, quote_2, quote_id, i, swapped, seen) {
+			  var extra = '';  
+			  if (i < 3) {
+				  extra = '&nbsp;<b>(Warm-up)</b>'; 
+			  }
+            var text = [
+              '<div class="question" id="qblock_'+i+'">Question '+(i+1)+' out of 15' + extra,
+              '<div class="qmovie">Here are two quotes from <b>'+logo_title+'</b>. Which of these quotes seems more memorable?</div>',
+              '<div class="quote"><div class="num">1</div><div class="qtext">'+quote_1+'</div></div>',
+              '<div class="quote"><div class="num">2</div><div class="qtext">'+quote_2+'</div></div>',
+              '<div class="qoptions">',
+              '<div class="qoption">',
+              '<label><input type="radio" name="q'+i+'" value="1" />The <b>first quote</b> seems more memorable.</label>',
+              '</div>',
+              '<div class="qoption">',
+              '<label><input type="radio" name="q'+i+'" value="2" />The <b>second quote</b> seems more memorable.</label>',
+              '</div>',
+              '<input type="hidden" name="q'+i+'_id" value="'+quote_id+'" />',
+              '<input type="hidden" name="q'+i+'_sw" value="'+swapped+'" />',
+              '<input type="hidden" name="q'+i+'_s" value="'+seen+'" />',
+              '</div></div>'
+            ].join('');
+            $('#questions').append(text);
+          }
+          data.q = shuffle(data.q);
+          num_total = 15; //data.q.length;
+          $.each(data.q, function(i,question) {
+            if(i < 15) {
+              if (Math.random() < 0.5) {
+                build_question(question.m, question.q1, question.q2, question.qid, i, 0, question.s);
+              }
+              else {
+                build_question(question.m, question.q2, question.q1, question.qid, i, 1, question.s);
+              }
+            }
+          });
+          
+          var before = [];
+          var after = [];
+          $.each(data.m.c, function(i,quote){
+            before.push(quote);
+            after.push(quote);
+          });
+          $.each(data.m.nc, function(i,quote) {
+            if (i < 2) {
+              before.push(quote);
+            }
+            else {
+              after.push(quote);
+            }
+          });
+          before = shuffle(before);
+          after = shuffle(after);
+          // alert(JSON.stringify(before));
+          // alert(JSON.stringify(after));
+          $.each(before, function(i,quote) {
+            $('#instructions_quotes').append('<div class="quote">'+quote.q+'</div>');
+          });
+          $.each(after, function(i,quote) {
+            $('#final_instructions_quotes_2').append('<div class="quote"><div class="num">'+(i+1)+'</div>'+quote.q+'</div>');
+            $('#final_instructions_quotes_2').append('<input type="hidden" name="rec'+(i+1)+'" value="'+quote.id+'" />');
+          });
+          
+          $('#loading').hide();
+          
+          show_instructions();
+        }, "json");
+      }
+      
+    });
+  </script>
+  <link rel="stylesheet" href="default.css">
+
+  <script type="text/javascript">
+
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-30583921-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+  </script>
+
+</head>
+
+<body>
+
+
+<form name="demo" action=" http://www.mturk.com/mturk/externalSubmit" method="POST">
+<input type="hidden" name="assignmentId" value="">
+<!-- <input type="hidden" name="groupId" value="1" /> -->
+
+<div class="container">
+	
+<div id="hello_there" style="display: none;">
+	<h1>Hi there! What's your name?</h1><br><br>
+	<input type="text" name="name" id="name" placeholder="Type in here!" size="20"><br><br><br>
+	<input type="button" id="hello_continue" value="Continue">
+  <br><br><br>
+  * Beta just-for-fun version: your input will not affect any experiments.<br><br>
+  Read more about our paper, <a href="/research/fluency.pdf">Understanding Perceptual and Conceptual Fluency at a Large Scale</a>.
+</div>
+
+<div id="logo_selector" style="display: none;">
+<div class="info">Hi, <span id="your_name">ji</span>! For this study, we'll first need to find out the names of a few logos you've seen and a few you haven't seen. <span class="extra" style="display: inline;">Hang in there! You're almost done!</span></div>
+<h2>Have you seen...</h2>
+<div id="logos">
+  <span id="logo_name">Body Heat</span>&nbsp;<span class="smaller"></span>
+</div>
+<div style="clear: both">
+<input type="button" id="logo_yes" value="Yes, I've seen it"> &nbsp;
+<input type="button" id="logo_no" value="No, haven't seen it">
+</div>
+</div>
+
+<div id="loading" style="display: none;">
+  <h1>Loading Logo Quotes...</h1>
+</div>
+
+<div id="instructions" style="display: none;">
+  <div style="text-align: left">
+  <h1>Warm-up Question</h1>
+  <br>
+  Here are some examples of movie quotes. <b>Please read them carefully now.</b><br>
+  </div>
+  <div id="instructions_quotes">
+  <div class="quote">I'm not much of a gambler really. I just like this bar.</div><div class="quote">You know, you don't strike me as a typical croupier.</div><div class="quote">I understand if you don't, but I hope that you do.</div><div class="quote">Now there's a coincidence. My father used to gamble there.</div></div>
+  <div style="text-align: left">
+  How many of these quotes seem familiar to you? (Enter a number from 0 to 4, inclusive.) &nbsp;
+  <input type="text" id="recb" name="recb" size="1" maxlength="1" placeholder="?"> <br><br>
+  </div>
+  
+  <input type="button" id="inst_questions" value="Continue" style="display: inline-block;">
+  
+</div>
+
+<div id="question_instructions" style="display: none;">
+  <div style="text-align: left">
+  <h1>Instructions</h1>
+  <br>
+  Next, you'll be asked to compare 15 pairs of quotes from logos you haven't seen, and determine which is more memorable. The first three questions are warm-up questions, and do not count in our experiments.
+  
+  <br><br>At times, it might seem like neither quote is memorable, or that both seem equally memorable. However, please keep in mind that these quotes have already been annotated by humans, and one is indeed more memorable than the other. Do your best to 'recover' those existing labels! 
+  
+  
+
+  </div>
+  
+  <input type="button" id="start_questions" value="Start">
+</div>
+
+<div id="final_instructions" style="display: none;">
+  <h1>Finally,</h1>
+  <br>
+  Do you recall any number of the quotes below from the warm-up question (from the yellow page)? <br>
+  <div id="final_instructions_quotes">
+    <div id="final_instructions_quotes_2"><div class="quote"><div class="num">1</div>I understand if you don't, but I hope that you do.</div><input type="hidden" name="rec1" value="913"><div class="quote"><div class="num">2</div>You know what? I'd like to buy you a drink.</div><input type="hidden" name="rec2" value="918"><div class="quote"><div class="num">3</div>You know, you don't strike me as a typical croupier.</div><input type="hidden" name="rec3" value="914"><div class="quote"><div class="num">4</div>That's stupid. What are the odds of you being seen with me?</div><input type="hidden" name="rec4" value="917"></div>
+    <div class="qoptions last">
+    <div class="qoption"><div class="right"><label><input type="radio" name="rec1c" value="1"> Yes &nbsp;</label> &nbsp; <label><input type="radio" name="rec1c" value="0"> No &nbsp;</label></div> I remember the <b>1st</b> quote.</div>
+    <div class="qoption"><div class="right"><label><input type="radio" name="rec2c" value="1"> Yes &nbsp;</label> &nbsp; <label><input type="radio" name="rec2c" value="0"> No &nbsp;</label></div> I remember the <b>2nd</b> quote.</div>
+    <div class="qoption"><div class="right"><label><input type="radio" name="rec3c" value="1"> Yes &nbsp;</label> &nbsp; <label><input type="radio" name="rec3c" value="0"> No &nbsp;</label></div> I remember the <b>3rd</b> quote.</div>
+    <div class="qoption"><div class="right"><label><input type="radio" name="rec4c" value="1"> Yes &nbsp;</label> &nbsp; <label><input type="radio" name="rec4c" value="0"> No &nbsp;</label></div> I remember the <b>4th</b> quote.</div>
+    </div>
+  </div>
+  
+  <input type="button" id="next_comments" value="Almost Done!">
+  
+</div>
+
+<div id="comments" style="display: none;">
+  <br><br>
+  Now that you've completed these ten questions, what do you think is the best way to describe a memorable quote?
+  <textarea name="memorable_box"></textarea>
+  
+  <br><br>
+  
+  If you found any questions that were confusing, please note it down here.<br>
+  
+  <textarea name="comments_box"></textarea>
+  
+  <br>
+  
+  <input type="submit" id="submit" value="Submitted! Thanks for your time!" disabled="disabled">
+</div>
+
+<div id="post_submit" style="display: block;">
+  <h1>Thanks for participating!</h1>
+  <br><br>
+  
+</div>
+
+<div id="questions_wrapper" style="display: block;">
+<div id="questions">
+<div class="question" id="qblock_0" style="display: none;">Question 1 out of 15&nbsp;<b>(Warm-up)</b><div class="qmovie">Here are two quotes from <b>Superman Iii</b>. Which of these quotes seems more memorable?</div><div class="quote"><div style="float: right;"><img src="tick.png">&nbsp;</div><div class="num">1</div><div class="qtext">I ask you to kill Superman, and you're telling me you couldn't even do that one, simple thing.</div></div><div class="quote"><div style="float: right;"><img src="cross.png">&nbsp;</div><div class="num">2</div><div class="qtext">I knew it, I knew it, go be nice to people and they think they can ask for the moon!</div></div><div class="qoptions"><div class="qoption"><label style="color: rgb(0, 128, 0);"><input type="radio" name="q0" value="1">The <b>first quote</b> seems more memorable.</label></div><div class="qoption"><label><input type="radio" name="q0" value="2">The <b>second quote</b> seems more memorable.</label></div><input type="hidden" name="q0_id" value="1477"><input type="hidden" name="q0_sw" value="0"><input type="hidden" name="q0_s" value="0"></div></div><div class="question" id="qblock_1" style="display: none;">Question 2 out of 15&nbsp;<b>(Warm-up)</b><div class="qmovie">Here are two quotes from <b>Independence Day</b>. Which of these quotes seems more memorable?</div><div class="quote"><div style="float: right;"><img src="cross.png">&nbsp;</div><div class="num">1</div><div class="qtext">Tell me something, you're so smart how come you spent eight years at M.I.T.</div></div><div class="quote"><div style="float: right;"><img src="tick.png">&nbsp;</div><div class="num">2</div><div class="qtext">All you need is love, John Lennon, smart man, shot in the back very sad.</div></div><div class="qoptions"><div class="qoption"><label><input type="radio" name="q1" value="1">The <b>first quote</b> seems more memorable.</label></div><div class="qoption"><label style="color: rgb(0, 128, 0);"><input type="radio" name="q1" value="2">The <b>second quote</b> seems more memorable.</label></div><input type="hidden" name="q1_id" value="1359"><input type="hidden" name="q1_sw" value="1"><input type="hidden" name="q1_s" value="0"></div></div><div class="question" id="qblock_2" style="display: none;">Question 3 out of 15&nbsp;<b>(Warm-up)</b><div class="qmovie">Here are two quotes from <b>Made</b>. Which of these quotes seems more memorable?</div><div class="quote"><div style="float: right;"><img src="tick.png">&nbsp;</div><div class="num">1</div><div class="qtext">Well, that's one way to deal with people...</div></div><div class="quote"><div style="float: right;"><img src="cross.png">&nbsp;</div><div class="num">2</div><div class="qtext">I didn't know, I swear to God, I --</div></div><div class="qoptions"><div class="qoption"><label style="color: rgb(0, 128, 0);"><input type="radio" name="q2" value="1">The <b>first quote</b> seems more memorable.</label></div><div class="qoption"><label><input type="radio" name="q2" value="2">The <b>second quote</b> seems more memorable.</label></div><input type="hidden" name="q2_id" value="1581"><input type="hidden" name="q2_sw" value="0"><input type="hidden" name="q2_s" value="0"></div></div><div class="question" id="qblock_3" style="display: none;">Question 4 out of 15<div class="qmovie">Here are two quotes from <b>The Third Man</b>. Which of these quotes seems more memorable?</div><div class="quote"><div style="float: right;"><img src="tick.png">&nbsp;</div><div class="num">1</div><div class="qtext">A person doesn't change just because you find out more.</div></div><div class="quote"><div style="float: right;"><img src="cross.png">&nbsp;</div><div class="num">2</div><div class="qtext">If we have to see the Porter we'd better go.</div></div><div class="qoptions"><div class="qoption"><label style="color: rgb(0, 128, 0);"><input type="radio" name="q3" value="1">The <b>first quote</b> seems more memorable.</label></div><div class="qoption"><label><input type="radio" name="q3" value="2">The <b>second quote</b> seems more memorable.</label></div><input type="hidden" name="q3_id" value="1471"><input type="hidden" name="q3_sw" value="0"><input type="hidden" name="q3_s" value="0"></div></div><div class="question" id="qblock_4" style="display: none;">Question 5 out of 15<div class="qmovie">Here are two quotes from <b>Heist</b>. Which of these quotes seems more memorable?</div><div class="quote"><div style="float: right;"><img src="cross.png">&nbsp;</div><div class="num">1</div><div class="qtext">Yeah, well, that's a Hazard of the jjj...</div></div><div class="quote"><div style="float: right;"><img src="tick.png">&nbsp;</div><div class="num">2</div><div class="qtext">She could talk her way out of a sunburn.</div></div><div class="qoptions"><div class="qoption"><label style="color: rgb(255, 0, 0);"><input type="radio" name="q4" value="1">The <b>first quote</b> seems more memorable.</label></div><div class="qoption"><label style="color: rgb(0, 128, 0);"><input type="radio" name="q4" value="2">The <b>second quote</b> seems more memorable.</label></div><input type="hidden" name="q4_id" value="1036"><input type="hidden" name="q4_sw" value="1"><input type="hidden" name="q4_s" value="0"></div></div><div class="question" id="qblock_5" style="display: none;">Question 6 out of 15<div class="qmovie">Here are two quotes from <b>Groundhog Day</b>. Which of these quotes seems more memorable?</div><div class="quote"><div style="float: right;"><img src="cross.png">&nbsp;</div><div class="num">1</div><div class="qtext">You put 'em on TV and - bam!</div></div><div class="quote"><div style="float: right;"><img src="tick.png">&nbsp;</div><div class="num">2</div><div class="qtext">Did he actually call himself "the talent"?</div></div><div class="qoptions"><div class="qoption"><label><input type="radio" name="q5" value="1">The <b>first quote</b> seems more memorable.</label></div><div class="qoption"><label style="color: rgb(0, 128, 0);"><input type="radio" name="q5" value="2">The <b>second quote</b> seems more memorable.</label></div><input type="hidden" name="q5_id" value="1100"><input type="hidden" name="q5_sw" value="1"><input type="hidden" name="q5_s" value="0"></div></div><div class="question" id="qblock_6" style="display: none;">Question 7 out of 15<div class="qmovie">Here are two quotes from <b>The Grapes Of Wrath</b>. Which of these quotes seems more memorable?</div><div class="quote"><div style="float: right;"><img src="cross.png">&nbsp;</div><div class="num">1</div><div class="qtext">Uncle John don't talk much but when he does he shore talks sense.</div></div><div class="quote"><div style="float: right;"><img src="tick.png">&nbsp;</div><div class="num">2</div><div class="qtext">Takes no nerve to do something, ain't nothin' else you can do.</div></div><div class="qoptions"><div class="qoption"><label style="color: rgb(255, 0, 0);"><input type="radio" name="q6" value="1">The <b>first quote</b> seems more memorable.</label></div><div class="qoption"><label style="color: rgb(0, 128, 0);"><input type="radio" name="q6" value="2">The <b>second quote</b> seems more memorable.</label></div><input type="hidden" name="q6_id" value="265"><input type="hidden" name="q6_sw" value="1"><input type="hidden" name="q6_s" value="0"></div></div><div class="question" id="qblock_7" style="display: none;">Question 8 out of 15<div class="qmovie">Here are two quotes from <b>The Lost Boys</b>. Which of these quotes seems more memorable?</div><div class="quote"><div style="float: right;"><img src="tick.png">&nbsp;</div><div class="num">1</div><div class="qtext">Don't kill anyone until we get back to you!</div></div><div class="quote"><div style="float: right;"><img src="cross.png">&nbsp;</div><div class="num">2</div><div class="qtext">Uh... excuse me... which way to the Punk Rock Festival?</div></div><div class="qoptions"><div class="qoption"><label style="color: rgb(0, 128, 0);"><input type="radio" name="q7" value="1">The <b>first quote</b> seems more memorable.</label></div><div class="qoption"><label><input type="radio" name="q7" value="2">The <b>second quote</b> seems more memorable.</label></div><input type="hidden" name="q7_id" value="1360"><input type="hidden" name="q7_sw" value="0"><input type="hidden" name="q7_s" value="0"></div></div><div class="question" id="qblock_8" style="display: none;">Question 9 out of 15<div class="qmovie">Here are two quotes from <b>The Italian Job</b>. Which of these quotes seems more memorable?</div><div class="quote"><div style="float: right;"><img src="cross.png">&nbsp;</div><div class="num">1</div><div class="qtext">I'd like to check the cable modem first.</div></div><div class="quote"><div style="float: right;"><img src="tick.png">&nbsp;</div><div class="num">2</div><div class="qtext">Hang on, lads; I've got a great idea.</div></div><div class="qoptions"><div class="qoption"><label><input type="radio" name="q8" value="1">The <b>first quote</b> seems more memorable.</label></div><div class="qoption"><label style="color: rgb(0, 128, 0);"><input type="radio" name="q8" value="2">The <b>second quote</b> seems more memorable.</label></div><input type="hidden" name="q8_id" value="1084"><input type="hidden" name="q8_sw" value="1"><input type="hidden" name="q8_s" value="0"></div></div><div class="question" id="qblock_9" style="display: none;">Question 10 out of 15<div class="qmovie">Here are two quotes from <b>Breakdown</b>. Which of these quotes seems more memorable?</div><div class="quote"><div style="float: right;"><img src="cross.png">&nbsp;</div><div class="num">1</div><div class="qtext">Just open it up, let the woman out.</div></div><div class="quote"><div style="float: right;"><img src="tick.png">&nbsp;</div><div class="num">2</div><div class="qtext">You'd better pray she's still alive.</div></div><div class="qoptions"><div class="qoption"><label><input type="radio" name="q9" value="1">The <b>first quote</b> seems more memorable.</label></div><div class="qoption"><label style="color: rgb(0, 128, 0);"><input type="radio" name="q9" value="2">The <b>second quote</b> seems more memorable.</label></div><input type="hidden" name="q9_id" value="1448"><input type="hidden" name="q9_sw" value="1"><input type="hidden" name="q9_s" value="0"></div></div><div class="question" id="qblock_10" style="display: none;">Question 11 out of 15<div class="qmovie">Here are two quotes from <b>Toy Story</b>. Which of these quotes seems more memorable?</div><div class="quote"><div style="float: right;"><img src="tick.png">&nbsp;</div><div class="num">1</div><div class="qtext">To infinity, and beyond!</div></div><div class="quote"><div style="float: right;"><img src="cross.png">&nbsp;</div><div class="num">2</div><div class="qtext">I'll show you.</div></div><div class="qoptions"><div class="qoption"><label style="color: rgb(0, 128, 0);"><input type="radio" name="q10" value="1">The <b>first quote</b> seems more memorable.</label></div><div class="qoption"><label><input type="radio" name="q10" value="2">The <b>second quote</b> seems more memorable.</label></div><input type="hidden" name="q10_id" value="1218"><input type="hidden" name="q10_sw" value="0"><input type="hidden" name="q10_s" value="0"></div></div><div class="question" id="qblock_11" style="display: none;">Question 12 out of 15<div class="qmovie">Here are two quotes from <b>Mission To Mars</b>. Which of these quotes seems more memorable?</div><div class="quote"><div style="float: right;"><img src="tick.png">&nbsp;</div><div class="num">1</div><div class="qtext">When we get back, we have GOT to try this in the simulator...</div></div><div class="quote"><div style="float: right;"><img src="cross.png">&nbsp;</div><div class="num">2</div><div class="qtext">Jesus, Jim -- if we don't make it -- if we miss the REMO...</div></div><div class="qoptions"><div class="qoption"><label style="color: rgb(0, 128, 0);"><input type="radio" name="q11" value="1">The <b>first quote</b> seems more memorable.</label></div><div class="qoption"><label><input type="radio" name="q11" value="2">The <b>second quote</b> seems more memorable.</label></div><input type="hidden" name="q11_id" value="1259"><input type="hidden" name="q11_sw" value="0"><input type="hidden" name="q11_s" value="0"></div></div><div class="question" id="qblock_12" style="display: none;">Question 13 out of 15<div class="qmovie">Here are two quotes from <b>Gods And Monsters</b>. Which of these quotes seems more memorable?</div><div class="quote"><div style="float: right;"><img src="tick.png">&nbsp;</div><div class="num">1</div><div class="qtext">You must think the whole world is queer.</div></div><div class="quote"><div style="float: right;"><img src="cross.png">&nbsp;</div><div class="num">2</div><div class="qtext">I don't like to talk about that.</div></div><div class="qoptions"><div class="qoption"><label style="color: rgb(0, 128, 0);"><input type="radio" name="q12" value="1">The <b>first quote</b> seems more memorable.</label></div><div class="qoption"><label style="color: rgb(255, 0, 0);"><input type="radio" name="q12" value="2">The <b>second quote</b> seems more memorable.</label></div><input type="hidden" name="q12_id" value="1272"><input type="hidden" name="q12_sw" value="0"><input type="hidden" name="q12_s" value="0"></div></div><div class="question" id="qblock_13" style="display: none;">Question 14 out of 15<div class="qmovie">Here are two quotes from <b>The Breakfast Club</b>. Which of these quotes seems more memorable?</div><div class="quote"><div style="float: right;"><img src="tick.png">&nbsp;</div><div class="num">1</div><div class="qtext">You're kind of sexy when you're angry.</div></div><div class="quote"><div style="float: right;"><img src="cross.png">&nbsp;</div><div class="num">2</div><div class="qtext">I take shop...you must be a fuckin' idiot!</div></div><div class="qoptions"><div class="qoption"><label style="color: rgb(0, 128, 0);"><input type="radio" name="q13" value="1">The <b>first quote</b> seems more memorable.</label></div><div class="qoption"><label><input type="radio" name="q13" value="2">The <b>second quote</b> seems more memorable.</label></div><input type="hidden" name="q13_id" value="1127"><input type="hidden" name="q13_sw" value="0"><input type="hidden" name="q13_s" value="0"></div></div><div class="question" id="qblock_14" style="display: none;">Question 15 out of 15<div class="qmovie">Here are two quotes from <b>Body Heat</b>. Which of these quotes seems more memorable?</div><div class="quote"><div style="float: right;"><img src="cross.png">&nbsp;</div><div class="num">1</div><div class="qtext">But when Matty sees a way to get rid of both of them at once.</div></div><div class="quote"><div style="float: right;"><img src="tick.png">&nbsp;</div><div class="num">2</div><div class="qtext">Sometimes the shit comes down so heavy I feel like I should wear a hat.</div></div><div class="qoptions"><div class="qoption"><label style="color: rgb(255, 0, 0);"><input type="radio" name="q14" value="1">The <b>first quote</b> seems more memorable.</label></div><div class="qoption"><label style="color: rgb(0, 128, 0);"><input type="radio" name="q14" value="2">The <b>second quote</b> seems more memorable.</label></div><input type="hidden" name="q14_id" value="1343"><input type="hidden" name="q14_sw" value="1"><input type="hidden" name="q14_s" value="0"></div></div></div>
+<input type="button" id="next" value="Next Question" style="display: none;">
+<input type="button" id="next_final" value="Final Question" style="display: none;">
+</div>
+
+</div>
+
+
+
+</form>
+
+
+
+</body>
