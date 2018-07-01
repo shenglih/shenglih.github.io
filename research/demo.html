@@ -3,32 +3,31 @@
 <head>
 <script type="text/javascript">
 <!-->
-var image1=new Image()
-image1.src="/research/logos/0-flag.jpeg"
-var image2=new Image()
-image2.src="/research/logos/001-sign.jpeg"
-var image3=new Image()
-image3.src="/research/logos/002-sign.jpeg"
-//-->
-</script>
-</head>
-<body>
-<img src="/research/logos/0-flag.jpeg" name="slide" width="400" height="400">
-<script type="text/javascript">
-<!--
-var step=1
-function slideit(){
-document.images.slide.src=eval("image"+step+".src")
-if(step<3)
-step++
-else
-step=1
-setTimeout("slideit()",2500)
+//Array of images
+var Images = ['/research/logos/0-flag.jpeg',
+  '/research/logos/001-sign.jpeg',
+  '/research/logos/002-sign.jpeg'
+];
+//Step counter
+var step = 1;
+
+function gallery() {
+  //change image
+  document.getElementById('Imgs').src = Images[step];
+  //Or you can use - document.images.slide.src=Images[step];
+  // is step more than the image array?
+  if (step < Images.length - 1) {
+    // No - add 1 for next image.
+    step++;
+  } else {
+    // Yes - Start from the first image
+    step = 0;
+  }
 }
-slideit()
-  
+//When the ready, set interval.
+window.onload = setInterval(gallery, 100);
 
 //-->
 </script>
 </body>
-</html> 
+</html>
