@@ -13,8 +13,8 @@ var step = 1;
 
 function gallery() {
   //change image
-  //document.getElementById('Imgs').src = Images[step];
-  document.images.slide.src=Images[step];
+  document.getElementById('Imgs').src = Images[step];
+  //document.images.slide.src=Images[step];
   // is step more than the image array?
   if (step < Images.length - 1) {
     // No - add 1 for next image.
