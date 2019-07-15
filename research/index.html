@@ -2,6 +2,22 @@
 layout: research
 title: Shengli Hu, Research
 ---
+<script>
+var coll = document.getElementsByClassName("collapsible");
+var i;
+
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.display === "block") {
+      content.style.display = "none";
+    } else {
+      content.style.display = "block";
+    }
+  });
+}
+</script>
 <div class="blurb">
 	<hr>
 	<p> Research Interests </p>
@@ -14,7 +30,8 @@ title: Shengli Hu, Research
 <!-- <h2> Dissertation Committee: Shawn Mankad, Vrinda Kadiyali, Kavita Bala, Vithala Rao </h2> -->
 
 <hr>
-	<p> Dissertation Chapters:</p>
+	<p> Selected Publications:</p>
+	<p>Dissertation: <a href="/research/dissertation.pdf">Information Design with Big Data</a>, 2019. Cornell University.</p>
 	<!--<p> Job Market Paper: </p>
 	<p> A Trip Down Memory Lane: Identifying and Reconstructing Memorable Consumer Experiences</p>
 	<ol>
@@ -28,7 +45,7 @@ title: Shengli Hu, Research
 		<li> Abstract:</li>
 		<li> Dataset: <a href=""> Instagram 14-15 </a></li>
 		<li> Code: <a href=""> Github Link</a></li>
-	</ol>-->
+	</ol>
 
 	<p>Information Design in Storytelling: Empirical Evidences from the Media and Entertainment Industry</p>
 	<ol>
@@ -48,20 +65,14 @@ title: Shengli Hu, Research
 		<li><a href=""> Draft</a> </li>		
 	</ol>
 	
-<hr>
-	<p> Selected Publications:</p>
-	<p> Detecting Concealed Information in Text and Speech </p>
-	<ol>
-		<li> Accepted at <a href="http://www.acl2019.org/EN/index.xhtml"> Association for Computational Linguistics (ACL 2019)</a> </li>
-	</ol>
+<hr>-->
+	<p>Detecting Concealed Information in Text and Speech</p>, 2019. In proceedings of <a href="http://www.acl2019.org/EN/index.xhtml"> Association for Computational Linguistics</a>. <a href="/research/1440_Paper.pdf">[pdf]</a>
+	<button class="collapsible"> Abstract: </button>
+	<div class="content"> Motivated by infamous cheating scandals in various industries and political events, we address the problem of detecting concealed information in technical settings. In this work, we explore acoustic-prosodic and linguistic indicators of information concealment by collecting a unique corpus of professionals practicing for oral exams while concealing information. We reveal subtle signs of concealed information in speech and text, compare, and contrast them with those in deception detection literature, thus uncovering the link between concealing information and deception. We then present a series of experiments that automatically detect concealed information from text and speech. We compare the use of acoustic-prosodic, linguistic, and individual feature sets, using different machine learn- ing models. Finally, we present a multi-task learning framework with acoustic, linguistic, and individual features, that outperforms hu- man performance by over 15%.</div>
 	
-	<p> <a href="/research/prediction_with_text.pdf">Single Stage Prediction with Embedded Topic Modeling of Online Reviews for Mobile App Development and Management</a></p>
-	  
-  <ol>
-    <li> Joint work with <a href="http://mankad-research.hosting.cornell.edu">Shawn Mankad</a> and <a href="http://scholar.rhsmith.umd.edu/anandgopal/home?destination=home">Anandasivam Gopal</a></li>
-    <li> Accepted at <a href="https://www.imstat.org/journals-and-publications/annals-of-applied-statistics/"> Annals of Applied Statistics </a></li>
-<li> Available at <a href="https://arxiv.org/"> ArXiv </a></li>
-	  <li> <button class="collapsible"> Abstract: </button>
+	<p>Single Stage Prediction with Embedded Topic Modeling of Online Reviews for Mobile App Development and Management</p>, 2018. Joint work with <a href="http://mankad-research.hosting.cornell.edu">Shawn Mankad</a> and <a href="http://scholar.rhsmith.umd.edu/anandgopal/home?destination=home">Anandasivam Gopal</a>. 
+	<a href="https://www.imstat.org/journals-and-publications/annals-of-applied-statistics/"> Annals of Applied Statistics </a>. <a href="/research/prediction_with_text.pdf">[pdf]</a>, <a href="https://arxiv.org/">ArXiv </a>.
+	  <button class="collapsible"> Abstract: </button>
 		  <div class="content">
 			  Mobile apps are one of the building blocks of the mobile digital economy. A
 differentiating feature of mobile apps to traditional enterprise software is online
