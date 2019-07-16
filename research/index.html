@@ -18,11 +18,24 @@ title: Shengli Hu, Research
 .active, .collapsible:hover {
   background-color: lavender;
 }
+	
+.collapsible:after {
+  content: '\002B';
+  color: white;
+  font-weight: bold;
+  float: right;
+  margin-left: 5px;
+}
 
+.active:after {
+  content: "\2212";
+}
+	
 .content {
   padding: 0 0px;
   display: none;
   overflow: hidden;
+  transition: max-height 0.2s ease-out;
   background-color: lavender;
 }
 </style>
